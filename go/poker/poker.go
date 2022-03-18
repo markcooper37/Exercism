@@ -34,6 +34,9 @@ const (
 )
 
 func BestHand(hands []string) ([]string, error) {
+	if len(hands) == 0 {
+		return []string{}, nil
+	}
 	handsSplit, err := ProcessCards(hands)
 	if err != nil {
 		return nil, err
@@ -41,8 +44,28 @@ func BestHand(hands []string) ([]string, error) {
 	for _, hand := range handsSplit {
 		hand.FindRank()
 	}
-
-	panic("Please implement the BestHand function")
+	bestHandsIndices := []int{0}
+	for i := 1; i < len(hands); i++ {
+		if handsSplit[i].HandRank < handsSplit[bestHandsIndices[0]].HandRank {
+			continue
+		} else if handsSplit[i].HandRank > handsSplit[bestHandsIndices[0]].HandRank {
+			bestHandsIndices = []int{i}
+		} else {
+			compareHands := CompareEqualRank(handsSplit[i], handsSplit[bestHandsIndices[0]])
+			if compareHands == "first" {
+				bestHandsIndices = []int{i}
+			} else if compareHands == "second" {
+				continue
+			} else if compareHands == "equal" {
+				bestHandsIndices = append(bestHandsIndices, i)
+			}
+		}
+	}
+	bestHands := []string{}
+	for _, index := range bestHandsIndices {
+		bestHands = append(bestHands, hands[index])
+	}
+	return bestHands, nil
 }
 
 // Check if there is a pair - if there is, it must be one pair,
@@ -81,41 +104,43 @@ func ProcessCards(hands []string) ([]Hand, error) {
 			handSplit = append(handSplit, Card{number, suit})
 		}
 		sort.Slice(handSplit, func(i, j int) bool { return handSplit[i].Number < handSplit[j].Number })
-		handsSplit = append(handsSplit, Hand{Cards: handSplit})
+		newHand := Hand{Cards: handSplit}
+		newHand.HandRank = newHand.FindRank()
+		handsSplit = append(handsSplit, newHand)
 	}
 	return handsSplit, nil
 }
 
-func (h *Hand) FindRank() {
+func (h *Hand) FindRank() HandRank {
 	if h.PairExists() {
 		if h.IsFourOfAKind() {
-			h.HandRank = FourOfAKind
+			return FourOfAKind
 		} else if h.IsFullHouse() {
-			h.HandRank = FullHouse
+			return FullHouse
 		} else if h.IsThreeOfAKind() {
-			h.HandRank = ThreeOfAKind
+			return ThreeOfAKind
 		} else if h.IsTwoPair() {
-			h.HandRank = TwoPair
+			return TwoPair
 		} else {
-			h.HandRank = OnePair
+			return OnePair
 		}
 	} else {
 		if h.IsFlush() && h.IsStraight() {
-			h.HandRank = StraightFlush
+			return StraightFlush
 		} else if h.IsFlush() {
-			h.HandRank = Flush
+			return Flush
 		} else if h.IsStraight() {
-			h.HandRank = Straight
+			return Straight
 		} else {
-			h.HandRank = HighCard
+			return HighCard
 		}
 	}
 }
 
 func (h *Hand) PairExists() bool {
-	return h.Cards[0].Number == h.Cards[1].Number &&
-		h.Cards[1].Number == h.Cards[2].Number &&
-		h.Cards[2].Number == h.Cards[3].Number &&
+	return h.Cards[0].Number == h.Cards[1].Number ||
+		h.Cards[1].Number == h.Cards[2].Number ||
+		h.Cards[2].Number == h.Cards[3].Number ||
 		h.Cards[3].Number == h.Cards[4].Number
 }
 
@@ -139,11 +164,11 @@ func (h *Hand) IsFlush() bool {
 
 func (h *Hand) IsFourOfAKind() bool {
 	return (h.Cards[0].Number == h.Cards[1].Number &&
-		h.Cards[1].Number+1 == h.Cards[2].Number &&
-		h.Cards[2].Number+1 == h.Cards[3].Number) ||
-		(h.Cards[1].Number+1 == h.Cards[2].Number &&
-			h.Cards[2].Number+1 == h.Cards[3].Number &&
-			h.Cards[3].Number+1 == h.Cards[4].Number)
+		h.Cards[1].Number == h.Cards[2].Number &&
+		h.Cards[2].Number == h.Cards[3].Number) ||
+		(h.Cards[1].Number == h.Cards[2].Number &&
+			h.Cards[2].Number == h.Cards[3].Number &&
+			h.Cards[3].Number == h.Cards[4].Number)
 }
 
 func (h *Hand) IsFullHouse() bool {
@@ -171,4 +196,76 @@ func (h *Hand) IsTwoPair() bool {
 			h.Cards[3].Number == h.Cards[4].Number) ||
 		(h.Cards[1].Number == h.Cards[2].Number &&
 			h.Cards[3].Number == h.Cards[4].Number)
+}
+
+func CompareEqualRank(first, second Hand) string {
+	if first.HandRank == HighCard ||
+		first.HandRank == Flush {
+		return CompareHighCards(first, second)
+	} else if first.HandRank == Straight ||
+		first.HandRank == StraightFlush {
+		if (first.Cards[0].Number == 2 &&
+			first.Cards[4].Number == 14) &&
+			(second.Cards[0].Number == 2 &&
+			second.Cards[4].Number != 14) {
+			return "second"
+		} else if (first.Cards[0].Number == 2 &&
+			first.Cards[4].Number != 14) && 
+			(second.Cards[0].Number == 2 && 
+			second.Cards[4].Number == 14) {
+			return "first"
+		} else {
+			return CompareHighCards(first, second)
+		}
+	} else {
+		firstEqualCards := first.FindEqualCards()
+		secondEqualCards := second.FindEqualCards()
+		for index, number := range firstEqualCards {
+			if number > secondEqualCards[index] {
+				return "first"
+			} else if number < secondEqualCards[index] {
+				return "second"
+			} else {
+				return CompareHighCards(first, second)
+			}
+		}
+	}
+	return ""
+}
+
+func CompareHighCards(first, second Hand) string {
+	for i := 4; i >= 0; i-- {
+		if first.Cards[i].Number > second.Cards[i].Number {
+			return "first"
+		} else if first.Cards[i].Number < second.Cards[i].Number {
+			return "second"
+		}
+	}
+	return "equal"
+}
+
+// Finds which sets of cards within a hand are equal
+// With a full house, it returns the three of a kind at the front
+// With two pair, it returns the largest pair at the front
+func (h *Hand) FindEqualCards() []int {
+	if h.HandRank == FourOfAKind || h.HandRank == ThreeOfAKind {
+		return []int{h.Cards[2].Number}
+	} else if h.HandRank == FullHouse {
+		if h.Cards[0].Number == h.Cards[1].Number &&
+			h.Cards[1].Number == h.Cards[2].Number {
+			return []int{h.Cards[0].Number, h.Cards[4].Number}
+		} else {
+			return []int{h.Cards[4].Number, h.Cards[0].Number}
+		}
+	} else if h.HandRank == TwoPair {
+		return []int{h.Cards[3].Number, h.Cards[1].Number}
+	} else if h.HandRank == OnePair {
+		if h.Cards[0].Number == h.Cards[1].Number ||
+			h.Cards[1].Number == h.Cards[2].Number {
+			return []int{h.Cards[1].Number}
+		} else {
+			return []int{h.Cards[3].Number}
+		}
+	}
+	return []int{}
 }
