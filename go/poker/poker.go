@@ -105,34 +105,34 @@ func ProcessCards(hands []string) ([]Hand, error) {
 		}
 		sort.Slice(handSplit, func(i, j int) bool { return handSplit[i].Number < handSplit[j].Number })
 		newHand := Hand{Cards: handSplit}
-		newHand.HandRank = newHand.FindRank()
+		newHand.FindRank()
 		handsSplit = append(handsSplit, newHand)
 	}
 	return handsSplit, nil
 }
 
-func (h *Hand) FindRank() HandRank {
+func (h *Hand) FindRank() {
 	if h.PairExists() {
 		if h.IsFourOfAKind() {
-			return FourOfAKind
+			h.HandRank = FourOfAKind
 		} else if h.IsFullHouse() {
-			return FullHouse
+			h.HandRank = FullHouse
 		} else if h.IsThreeOfAKind() {
-			return ThreeOfAKind
+			h.HandRank = ThreeOfAKind
 		} else if h.IsTwoPair() {
-			return TwoPair
+			h.HandRank = TwoPair
 		} else {
-			return OnePair
+			h.HandRank = OnePair
 		}
 	} else {
 		if h.IsFlush() && h.IsStraight() {
-			return StraightFlush
+			h.HandRank = StraightFlush
 		} else if h.IsFlush() {
-			return Flush
+			h.HandRank = Flush
 		} else if h.IsStraight() {
-			return Straight
+			h.HandRank = Straight
 		} else {
-			return HighCard
+			h.HandRank = HighCard
 		}
 	}
 }
