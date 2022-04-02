@@ -2,6 +2,7 @@ package ledger
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -21,7 +22,7 @@ type Data struct {
 
 func FormatLedger(currency string, locale string, entries []Entry) (string, error) {
 	var entriesCopy []Entry
-	// Simplify appending of entries
+	// Simplified appending of entries to copy
 	entriesCopy = append(entriesCopy, entries...)
 	if len(entries) == 0 {
 		if _, err := FormatLedger(currency, "en-US", []Entry{{Date: "2014-01-01", Description: "", Change: 0}}); err != nil {
@@ -48,24 +49,18 @@ func FormatLedger(currency string, locale string, entries []Entry) (string, erro
 		es = es[1:]
 	}
 
-	var s string
+	// Reduced repetition when finding strings that will be used in s
+	var first, second, third string
 	if locale == "nl-NL" {
-		s = "Datum" +
-			strings.Repeat(" ", 10-len("Datum")) +
-			" | " +
-			"Omschrijving" +
-			strings.Repeat(" ", 25-len("Omschrijving")) +
-			" | " + "Verandering" + "\n"
+		first, second, third = "Datum", "Omschrijving", "Verandering"
 	} else if locale == "en-US" {
-		s = "Date" +
-			strings.Repeat(" ", 10-len("Date")) +
-			" | " +
-			"Description" +
-			strings.Repeat(" ", 25-len("Description")) +
-			" | " + "Change" + "\n"
+		first, second, third = "Date", "Description", "Change"
 	} else {
 		return "", errors.New("")
 	}
+	// Simplified expression to create s
+	s := fmt.Sprintf("%-10s | %-25s | %s\n", first, second, third)
+
 	// Parallelism, always a great idea
 	co := make(chan Data)
 	for i, et := range entriesCopy {
@@ -146,13 +141,8 @@ func FormatLedger(currency string, locale string, entries []Entry) (string, erro
 				} else {
 					co <- Data{e: errors.New("")}
 				}
-				centsStr := strconv.Itoa(cents)
-				switch len(centsStr) {
-				case 1:
-					centsStr = "00" + centsStr
-				case 2:
-					centsStr = "0" + centsStr
-				}
+				// Added zeros more concisely
+				centsStr := fmt.Sprintf("%03s", strconv.Itoa(cents))
 				rest := centsStr[:len(centsStr)-2]
 				var parts []string
 				for len(rest) > 3 {
