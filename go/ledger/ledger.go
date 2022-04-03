@@ -69,10 +69,7 @@ func FormatLedger(currency string, locale string, entries []Entry) (string, erro
 				co <- Data{e: errors.New("")}
 			}
 			d1, d2, d3, d4, d5 := entry.Date[0:4], entry.Date[4], entry.Date[5:7], entry.Date[7], entry.Date[8:10]
-			if d2 != '-' {
-				co <- Data{e: errors.New("")}
-			}
-			if d4 != '-' {
+			if d2 != '-' || d4 != '-' {
 				co <- Data{e: errors.New("")}
 			}
 			de := entry.Description
@@ -94,44 +91,10 @@ func FormatLedger(currency string, locale string, entries []Entry) (string, erro
 				negative = true
 			}
 			var a string
-			if locale == "nl-NL" {
-				if currency == "EUR" {
-					a += "€"
-				} else if currency == "USD" {
-					a += "$"
-				} else {
-					co <- Data{e: errors.New("")}
-				}
-				a += " "
-				centsStr := strconv.Itoa(cents)
-				switch len(centsStr) {
-				case 1:
-					centsStr = "00" + centsStr
-				case 2:
-					centsStr = "0" + centsStr
-				}
-				rest := centsStr[:len(centsStr)-2]
-				var parts []string
-				for len(rest) > 3 {
-					parts = append(parts, rest[len(rest)-3:])
-					rest = rest[:len(rest)-3]
-				}
-				if len(rest) > 0 {
-					parts = append(parts, rest)
-				}
-				for i := len(parts) - 1; i >= 0; i-- {
-					a += parts[i] + "."
-				}
-				a = a[:len(a)-1]
-				a += ","
-				a += centsStr[len(centsStr)-2:]
-				if negative {
-					a += "-"
-				} else {
-					a += " "
-				}
-			} else if locale == "en-US" {
-				if negative {
+			if locale != "nl-NL" && locale != "en-US" {
+				co <- Data{e: errors.New("")}
+			} else {
+				if negative && locale == "en-US" {
 					a += "("
 				}
 				if currency == "EUR" {
@@ -140,6 +103,9 @@ func FormatLedger(currency string, locale string, entries []Entry) (string, erro
 					a += "$"
 				} else {
 					co <- Data{e: errors.New("")}
+				}
+				if locale == "nl-NL" {
+					a += " "
 				}
 				// Added zeros more concisely
 				centsStr := fmt.Sprintf("%03s", strconv.Itoa(cents))
@@ -152,19 +118,27 @@ func FormatLedger(currency string, locale string, entries []Entry) (string, erro
 				if len(rest) > 0 {
 					parts = append(parts, rest)
 				}
-				for i := len(parts) - 1; i >= 0; i-- {
-					a += parts[i] + ","
+				if locale == "nl-NL" {
+					for i := len(parts) - 1; i >= 0; i-- {
+						a += parts[i] + "."
+					}
+					a = a[:len(a)-1] + "," + centsStr[len(centsStr)-2:]
+					if negative {
+						a += "-"
+					} else {
+						a += " "
+					}
+				} else if locale == "en-US" {
+					for i := len(parts) - 1; i >= 0; i-- {
+						a += parts[i] + ","
+					}
+					a = a[:len(a)-1] + "." + centsStr[len(centsStr)-2:]
+					if negative {
+						a += ")"
+					} else {
+						a += " "
+					}
 				}
-				a = a[:len(a)-1]
-				a += "."
-				a += centsStr[len(centsStr)-2:]
-				if negative {
-					a += ")"
-				} else {
-					a += " "
-				}
-			} else {
-				co <- Data{e: errors.New("")}
 			}
 			var al int
 			for range a {
