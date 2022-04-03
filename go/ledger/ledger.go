@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 )
 
 type Entry struct {
@@ -21,9 +20,8 @@ type Data struct {
 }
 
 func FormatLedger(currency string, locale string, entries []Entry) (string, error) {
-	var entriesCopy []Entry
 	// Simplified appending of entries to copy
-	entriesCopy = append(entriesCopy, entries...)
+	entriesCopy := append([]Entry{}, entries...)
 	if len(entries) == 0 {
 		if _, err := FormatLedger(currency, "en-US", []Entry{{Date: "2014-01-01", Description: "", Change: 0}}); err != nil {
 			return "", err
@@ -65,24 +63,21 @@ func FormatLedger(currency string, locale string, entries []Entry) (string, erro
 	co := make(chan Data)
 	for i, et := range entriesCopy {
 		go func(i int, entry Entry) {
-			if len(entry.Date) != 10 {
+			if len(entry.Date) != 10 || entry.Date[4] != '-' || entry.Date[7] != '-' {
 				co <- Data{e: errors.New("")}
 			}
-			d1, d2, d3, d4, d5 := entry.Date[0:4], entry.Date[4], entry.Date[5:7], entry.Date[7], entry.Date[8:10]
-			if d2 != '-' || d4 != '-' {
-				co <- Data{e: errors.New("")}
-			}
-			de := entry.Description
-			if len(de) > 25 {
-				de = de[:22] + "..."
-			} else {
-				de = de + strings.Repeat(" ", 25-len(de))
-			}
+			d1, d3, d5 := entry.Date[0:4], entry.Date[5:7], entry.Date[8:10]
 			var d string
 			if locale == "nl-NL" {
 				d = d5 + "-" + d3 + "-" + d1
 			} else if locale == "en-US" {
 				d = d3 + "/" + d5 + "/" + d1
+			}
+			de := entry.Description
+			if len(de) > 25 {
+				de = de[:22] + "..."
+			} else {
+				de = fmt.Sprintf("%-25s", de)
 			}
 			negative := false
 			cents := entry.Change
@@ -118,34 +113,25 @@ func FormatLedger(currency string, locale string, entries []Entry) (string, erro
 				if len(rest) > 0 {
 					parts = append(parts, rest)
 				}
+				var p1, p2 string
 				if locale == "nl-NL" {
-					for i := len(parts) - 1; i >= 0; i-- {
-						a += parts[i] + "."
-					}
-					a = a[:len(a)-1] + "," + centsStr[len(centsStr)-2:]
-					if negative {
-						a += "-"
-					} else {
-						a += " "
-					}
+					p1, p2 = ".", ","
 				} else if locale == "en-US" {
-					for i := len(parts) - 1; i >= 0; i-- {
-						a += parts[i] + ","
-					}
-					a = a[:len(a)-1] + "." + centsStr[len(centsStr)-2:]
-					if negative {
-						a += ")"
-					} else {
-						a += " "
-					}
+					p1, p2 = ",", "."
+				}
+				for i := len(parts) - 1; i >= 0; i-- {
+					a += parts[i] + p1
+				}
+				a = a[:len(a)-1] + p2 + centsStr[len(centsStr)-2:]
+				if negative && locale == "nl-NL" {
+					a += "-"
+				} else if negative && locale == "en-US" {
+					a += ")"
+				} else {
+					a += " "
 				}
 			}
-			var al int
-			for range a {
-				al++
-			}
-			co <- Data{i: i, s: d + strings.Repeat(" ", 10-len(d)) + " | " + de + " | " +
-				strings.Repeat(" ", 13-al) + a + "\n"}
+			co <- Data{i: i, s: fmt.Sprintf("%-10s | %s | %13s\n", d, de, a)}
 		}(i, et)
 	}
 	ss := make([]string, len(entriesCopy))
