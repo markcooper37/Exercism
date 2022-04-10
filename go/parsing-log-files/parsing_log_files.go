@@ -1,6 +1,9 @@
 package parsinglogfiles
 
-import "regexp"
+import (
+    "regexp"
+    "strings"
+)
 
 func IsValidLine(text string) bool {
 	re := regexp.MustCompile(`^\[(TRC|DBG|INF|WRN|ERR|FTL)\]`)
@@ -29,5 +32,13 @@ func RemoveEndOfLineText(text string) string {
 }
 
 func TagWithUserName(lines []string) []string {
-	return []string{}
+    re := regexp.MustCompile(`User +\S+`)
+    for i, line := range lines {
+        user := re.FindString(line)
+        if user != "" {
+            username := strings.Fields(user)[1]
+            lines[i] = "[USR] " + username + " " + lines[i]
+        }
+    }
+	return lines
 }
