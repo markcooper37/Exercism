@@ -2,6 +2,7 @@ package markdown
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -11,26 +12,25 @@ func Render(markdown string) string {
 	output := ""
 	list := false
 	for index, paragraph := range paragraphs {
-		paragraph = strings.Replace(paragraph, "__", "<strong>", 1)
-		paragraph = strings.Replace(paragraph, "__", "</strong>", 1)
-		paragraph = strings.Replace(paragraph, "_", "<em>", 1)
-		paragraph = strings.Replace(paragraph, "_", "</em>", 1)
-		header := 0
+		re := regexp.MustCompile(`__(.*)__`)
+		paragraph = re.ReplaceAllString(paragraph, "<strong>$1</strong>")
+		re = regexp.MustCompile(`_(.*)_`)
+		paragraph = re.ReplaceAllString(paragraph, "<em>$1</em>")
 		char := paragraph[0]
 		if char == '#' {
-			pos := 0
+			header, pos := 0, 0
 			for char == '#' {
 				header++
 				pos++
-				char = markdown[pos]
+				char = paragraph[pos]
 			}
 			output += fmt.Sprintf("<h%d>%s</h%d>", header, paragraph[pos+1:], header)
 		} else if char == '*' {
 			newParagraph := "<li>" + paragraph[2:] + "</li>"
 			if !list {
 				newParagraph = "<ul>" + newParagraph
+				list = true
 			}
-			list = true
 			if index == len(paragraphs)-1 || paragraphs[index+1][0] != '*' {
 				newParagraph += "</ul>"
 				list = false
