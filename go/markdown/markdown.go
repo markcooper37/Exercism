@@ -1,7 +1,5 @@
 package markdown
 
-// implementation to refactor
-
 import (
 	"fmt"
 	"strings"
@@ -14,7 +12,7 @@ func Render(markdown string) string {
 	markdown = strings.Replace(markdown, "__", "</strong>", 1)
 	markdown = strings.Replace(markdown, "_", "<em>", 1)
 	markdown = strings.Replace(markdown, "_", "</em>", 1)
-	list := 0
+	list := false
 	html := ""
 	for pos := 0; pos < len(markdown); pos++ {
 		char := markdown[pos]
@@ -26,14 +24,14 @@ func Render(markdown string) string {
 			}
 			html += fmt.Sprintf("<h%d>", header)
 		} else if char == '*' {
-			if list == 0 {
+			if !list {
 				html += "<ul>"
+				list = true
 			}
 			html += "<li>"
-			list++
 			pos++
 		} else if char == '\n' {
-			if list > 0 {
+			if list {
 				html += "</li>"
 			}
 			if header > 0 {
@@ -46,7 +44,7 @@ func Render(markdown string) string {
 	}
 	if header > 0 {
 		return html + fmt.Sprintf("</h%d>", header)
-	} else if list > 0 {
+	} else if list {
 		return html + "</li></ul>"
 	} else {
 		return "<p>" + html + "</p>"
