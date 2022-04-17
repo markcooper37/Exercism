@@ -7,46 +7,38 @@ import (
 
 // Render translates markdown to HTML
 func Render(markdown string) string {
-	header := 0
-	markdown = strings.Replace(markdown, "__", "<strong>", 1)
-	markdown = strings.Replace(markdown, "__", "</strong>", 1)
-	markdown = strings.Replace(markdown, "_", "<em>", 1)
-	markdown = strings.Replace(markdown, "_", "</em>", 1)
+	paragraphs := strings.Split(markdown, "\n")
+	output := ""
 	list := false
-	html := ""
-	for pos := 0; pos < len(markdown); pos++ {
-		char := markdown[pos]
+	for index, paragraph := range paragraphs {
+		paragraph = strings.Replace(paragraph, "__", "<strong>", 1)
+		paragraph = strings.Replace(paragraph, "__", "</strong>", 1)
+		paragraph = strings.Replace(paragraph, "_", "<em>", 1)
+		paragraph = strings.Replace(paragraph, "_", "</em>", 1)
+		header := 0
+		char := paragraph[0]
 		if char == '#' {
+			pos := 0
 			for char == '#' {
 				header++
 				pos++
 				char = markdown[pos]
 			}
-			html += fmt.Sprintf("<h%d>", header)
+			output += fmt.Sprintf("<h%d>%s</h%d>", header, paragraph[pos+1:], header)
 		} else if char == '*' {
+			newParagraph := "<li>" + paragraph[2:] + "</li>"
 			if !list {
-				html += "<ul>"
-				list = true
+				newParagraph = "<ul>" + newParagraph
 			}
-			html += "<li>"
-			pos++
-		} else if char == '\n' {
-			if list {
-				html += "</li>"
+			list = true
+			if index == len(paragraphs)-1 || paragraphs[index+1][0] != '*' {
+				newParagraph += "</ul>"
+				list = false
 			}
-			if header > 0 {
-				html += fmt.Sprintf("</h%d>", header)
-				header = 0
-			}
+			output += newParagraph
 		} else {
-			html += string(char)
+			output += "<p>" + paragraph + "</p>"
 		}
 	}
-	if header > 0 {
-		return html + fmt.Sprintf("</h%d>", header)
-	} else if list {
-		return html + "</li></ul>"
-	} else {
-		return "<p>" + html + "</p>"
-	}
+	return output
 }
