@@ -2,7 +2,6 @@ package alphametics
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"strings"
 )
@@ -39,7 +38,6 @@ func Solve(puzzle string) (map[string]int, error) {
 	}
 	solutions := []map[string]int{}
 	for i := 0; i < int(math.Pow(10, float64(len(letters)))); i++ {
-		fmt.Println(letters, i)
 		numberUsed := map[int]bool{}
 		letterValues := map[string]int{}
 		numberToTest := i
@@ -71,7 +69,6 @@ func Solve(puzzle string) (map[string]int, error) {
 		}
 	}
 	if len(solutions) != 1 {
-		fmt.Println(solutions)
 		return nil, errors.New("no unique solution")
 	} else {
 		return solutions[0], nil
