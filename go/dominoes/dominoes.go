@@ -11,23 +11,16 @@ func MakeChain(input []Domino) ([]Domino, bool) {
 		if index == 0 {
 			continue
 		}
+		if domino[1] == currentDomino[1] {
+			domino[0], domino[1] = domino[1], domino[0]
+		}
 		if domino[0] == currentDomino[1] {
 			newDomino := Domino([2]int{currentDomino[0], domino[1]})
 			newDominoes := append([]Domino{newDomino}, input[1:index]...)
 			newDominoes = append(newDominoes, input[index+1:]...)
-			solution, ok := MakeChain(newDominoes)
+			oldSolution, ok := MakeChain(newDominoes)
 			if ok {
-				newSolution := append([]Domino{currentDomino, domino}, solution[1:]...)
-				return newSolution, true
-			}
-		} else if domino[1] == currentDomino[1] {
-			switchDomino := Domino([2]int{domino[1], domino[0]})
-			newDomino := Domino([2]int{currentDomino[0], switchDomino[1]})
-			newDominoes := append([]Domino{newDomino}, input[1:index]...)
-			newDominoes = append(newDominoes, input[index+1:]...)
-			solution, ok := MakeChain(newDominoes)
-			if ok {
-				newSolution := append([]Domino{currentDomino, switchDomino}, solution[1:]...)
+				newSolution := append([]Domino{currentDomino, domino}, oldSolution[1:]...)
 				return newSolution, true
 			}
 		}
