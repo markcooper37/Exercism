@@ -2,7 +2,6 @@ package account
 
 import "sync"
 
-// Define the Account type here.
 type Account struct {
 	mu    sync.Mutex
 	money int64
