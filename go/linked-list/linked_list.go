@@ -5,7 +5,7 @@ import (
 )
 
 type Node struct {
-	Val          interface{}
+	Value          interface{}
 	NextNode     *Node
 	PreviousNode *Node
 }
@@ -35,7 +35,7 @@ func (n *Node) Prev() *Node {
 }
 
 func (l *List) PushFront(v interface{}) {
-	l.head = &Node{Val: v, NextNode: l.head}
+	l.head = &Node{Value: v, NextNode: l.head}
 	l.size++
 	if l.size == 1 {
 		l.tail = l.head
@@ -45,7 +45,7 @@ func (l *List) PushFront(v interface{}) {
 }
 
 func (l *List) PushBack(v interface{}) {
-	l.tail = &Node{Val: v, PreviousNode: l.tail}
+	l.tail = &Node{Value: v, PreviousNode: l.tail}
 	l.size++
 	if l.size == 1 {
 		l.head = l.tail
@@ -58,7 +58,7 @@ func (l *List) PopFront() (interface{}, error) {
 	if l.size == 0 {
 		return nil, ErrEmptyList
 	}
-	value := l.head.Val
+	value := l.head.Value
 	if l.size == 1 {
 		l.head, l.tail = nil, nil
 	} else {
@@ -73,7 +73,7 @@ func (l *List) PopBack() (interface{}, error) {
 	if l.size == 0 {
 		return nil, ErrEmptyList
 	}
-	value := l.tail.Val
+	value := l.tail.Value
 	if l.size == 1 {
 		l.head, l.tail = nil, nil
 	} else {
