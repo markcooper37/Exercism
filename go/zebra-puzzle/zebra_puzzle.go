@@ -45,8 +45,9 @@ func SolvePuzzle() Solution {
 		gridsComplete = true
 		for index := range grids {
 			grids[index].CompareGrids(grids)
-			// check remaining info in initial problem
-			// fill in rows and columns where match is found or only one possibility remains
+			grids[index].AdditionalChecks()
+			grids[index].RowColumnComplete()
+			grids[index].FillSinglePossibilities()
 			if !grids[index].IsComplete() {
 				gridsComplete = false
 			}
@@ -92,6 +93,10 @@ func (g *Grid) InitialiseGrid() {
 	}
 	if g.rows == Nationality && g.columns == Cigarettes {
 		g.grid[2][2] = Match
+	}
+	if g.rows == Position && g.columns == Colour {
+		g.grid[0][1] = NoMatch
+		g.grid[4][4] = NoMatch
 	}
 }
 
@@ -139,15 +144,113 @@ func (g *Grid) CompareGrids(grids []Grid) {
 					} else {
 						isSecondMatch = secondGrid.grid[columnIndex][j]
 					}
-					if isFirstMatch == 1 && isSecondMatch == 2 || isFirstMatch == 2 && isSecondMatch == 1 {
-						g.grid[rowIndex][columnIndex] = 2
-					} else if isFirstMatch == 1 && isSecondMatch == 1 {
-						g.grid[rowIndex][columnIndex] = 1
+					if isFirstMatch == Match && isSecondMatch == NoMatch || isFirstMatch == NoMatch && isSecondMatch == Match {
+						g.grid[rowIndex][columnIndex] = NoMatch
+					} else if isFirstMatch == Match && isSecondMatch == Match {
+						g.grid[rowIndex][columnIndex] = Match
 					}
 				}
 			}
 		}
 	}
+}
+
+func (g *Grid) AdditionalChecks() {
+	// checking green house is on the right of the ivory house
+	if g.rows == Position && g.columns == Colour {
+		for i := 0; i <= 4; i++ {
+			if g.grid[i][1] == Match {
+				g.grid[i-1][4] = Match
+			} else if g.grid[i][1] == NoMatch && i > 0 {
+				g.grid[i-1][4] = NoMatch
+			}
+			if g.grid[i][4] == Match {
+				g.grid[i+1][1] = Match
+			} else if g.grid[i][4] == NoMatch && i < 4 {
+				g.grid[i+1][1] = NoMatch
+			}
+		}
+	}
+	// checking Chesterfield is next to fox
+
+	// checking Kool is next to horse
+
+	// checking Norwegian is next to blue
+}
+
+func (g *Grid) RowColumnComplete() {
+	for rowIndex, row := range g.grid {
+		for columnIndex := range row {
+			if g.RowComplete(rowIndex) || g.ColumnComplete(columnIndex) {
+				g.grid[rowIndex][columnIndex] = NoMatch
+			}
+		}
+	}
+}
+
+func (g *Grid) RowComplete(rowIndex int) bool {
+	for _, position := range g.grid[rowIndex] {
+		if position == Match {
+			return true
+		}
+	}
+	return false
+}
+
+func (g *Grid) ColumnComplete(columnIndex int) bool {
+	for _, row := range g.grid {
+		if row[columnIndex] == Match {
+			return true
+		}
+	}
+	return false
+}
+
+func (g *Grid) FillSinglePossibilities() {
+	for rowIndex := range g.grid {
+		unknownIndex, oneUnknown := g.OnePossibilityRow(rowIndex)
+		if oneUnknown {
+			g.grid[rowIndex][unknownIndex] = Match
+		}
+	}
+	for columnIndex := range g.grid[0] {
+		unknownIndex, oneUnknown := g.OnePossibilityColumn(columnIndex)
+		if oneUnknown {
+			g.grid[unknownIndex][columnIndex] = Match
+		}
+	}
+}
+
+func (g *Grid) OnePossibilityRow(rowIndex int) (int, bool) {
+	oneUnknown := false
+	unknownIndex := -1
+	for index, value := range g.grid[rowIndex] {
+		if value == Match {
+			return -1, false
+		} else if value == Unknown && !oneUnknown {
+			unknownIndex = index
+			oneUnknown = true
+		} else if value == Unknown && oneUnknown {
+			return -1, false
+		}
+	}
+	return unknownIndex, oneUnknown
+}
+
+func (g *Grid) OnePossibilityColumn(columnIndex int) (int, bool) {
+	oneUnknown := false
+	unknownIndex := -1
+	for index, row := range g.grid {
+		if row[columnIndex] == Match {
+			return -1, false
+		} else if row[columnIndex] == Unknown && !oneUnknown {
+			unknownIndex = index
+			oneUnknown = true
+		} else if row[columnIndex] == Unknown && oneUnknown {
+			return -1, false
+		}
+	}
+	return unknownIndex, oneUnknown
 }
 
 func FindGridIndex(row, column int) int {
