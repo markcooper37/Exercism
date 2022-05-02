@@ -1,7 +1,5 @@
 package zebra
 
-import "fmt"
-
 type Grid struct {
 	rows    Category
 	columns Category
@@ -52,7 +50,6 @@ func SolvePuzzle() Solution {
 				gridsComplete = false
 			}
 		}
-		fmt.Println(grids)
 	}
 	panic("Please implement the SolvePuzzle function")
 }
@@ -133,7 +130,7 @@ func (g *Grid) CompareGrids(grids []Grid) {
 					continue
 				}
 				for j := 0; j <= 4; j++ {
-					isFirstMatch, isSecondMatch := 0, 0
+					isFirstMatch, isSecondMatch := Unknown, Unknown
 					if i < int(g.rows) {
 						isFirstMatch = firstGrid.grid[j][rowIndex]
 					} else {
@@ -181,6 +178,9 @@ func (g *Grid) AdditionalChecks() {
 func (g *Grid) RowColumnComplete() {
 	for rowIndex, row := range g.grid {
 		for columnIndex := range row {
+			if g.grid[rowIndex][columnIndex] == Match {
+				continue
+			}
 			if g.RowComplete(rowIndex) || g.ColumnComplete(columnIndex) {
 				g.grid[rowIndex][columnIndex] = NoMatch
 			}
@@ -255,7 +255,7 @@ func (g *Grid) OnePossibilityColumn(columnIndex int) (int, bool) {
 
 func FindGridIndex(row, column int) int {
 	if row == 0 {
-		return column
+		return column - 1
 	} else if row == 1 {
 		return row + column + 2
 	} else if row == 2 {
