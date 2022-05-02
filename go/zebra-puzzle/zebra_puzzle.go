@@ -1,5 +1,7 @@
 package zebra
 
+import "fmt"
+
 type Grid struct {
 	rows    Category
 	columns Category
@@ -29,16 +31,27 @@ type Solution struct {
 }
 
 func SolvePuzzle() Solution {
-	grids := [5][6]Grid{}
+	grids := []Grid{}
 	for i := 0; i <= 4; i++ {
-		for j := i; j <= 5; j++ {
-			grids[i][j] = Grid{rows: Category(i), columns: Category(j), grid: [5][5]int{}}
+		for j := i + 1; j <= 5; j++ {
+			grids = append(grids, Grid{rows: Category(i), columns: Category(j), grid: [5][5]int{}})
 		}
 	}
-	for rowIndex, row := range grids {
-		for columnIndex := range row {
-			grids[rowIndex][columnIndex].InitialiseGrid()
+	for index := range grids {
+		grids[index].InitialiseGrid()
+	}
+	gridsComplete := false
+	for !gridsComplete {
+		gridsComplete = true
+		for index := range grids {
+			grids[index].CompareGrids(grids)
+			// check remaining info in initial problem
+			// fill in rows and columns where match is found or only one possibility remains
+			if !grids[index].IsComplete() {
+				gridsComplete = false
+			}
 		}
+		fmt.Println(grids)
 	}
 	panic("Please implement the SolvePuzzle function")
 }
@@ -82,8 +95,73 @@ func (g *Grid) InitialiseGrid() {
 	}
 }
 
-func (g *Grid) FillGrid() {
+func (g *Grid) IsComplete() bool {
+	for _, row := range g.grid {
+		for _, position := range row {
+			if position == Unknown {
+				return false
+			}
+		}
+	}
+	return true
+}
 
+func (g *Grid) CompareGrids(grids []Grid) {
+	for i := 0; i <= 5; i++ {
+		if i == int(g.rows) || i == int(g.columns) {
+			continue
+		}
+		firstGrid, secondGrid := Grid{}, Grid{}
+		if i < int(g.rows) {
+			firstGrid = grids[FindGridIndex(i, int(g.rows))]
+		} else {
+			firstGrid = grids[FindGridIndex(int(g.rows), i)]
+		}
+		if i < int(g.columns) {
+			secondGrid = grids[FindGridIndex(i, int(g.columns))]
+		} else {
+			secondGrid = grids[FindGridIndex(int(g.columns), i)]
+		}
+		for rowIndex, row := range g.grid {
+			for columnIndex := range row {
+				if g.grid[rowIndex][columnIndex] != 0 {
+					continue
+				}
+				for j := 0; j <= 4; j++ {
+					isFirstMatch, isSecondMatch := 0, 0
+					if i < int(g.rows) {
+						isFirstMatch = firstGrid.grid[j][rowIndex]
+					} else {
+						isFirstMatch = firstGrid.grid[rowIndex][j]
+					}
+					if i < int(g.columns) {
+						isSecondMatch = secondGrid.grid[j][columnIndex]
+					} else {
+						isSecondMatch = secondGrid.grid[columnIndex][j]
+					}
+					if isFirstMatch == 1 && isSecondMatch == 2 || isFirstMatch == 2 && isSecondMatch == 1 {
+						g.grid[rowIndex][columnIndex] = 2
+					} else if isFirstMatch == 1 && isSecondMatch == 1 {
+						g.grid[rowIndex][columnIndex] = 1
+					}
+				}
+			}
+		}
+	}
+}
+
+func FindGridIndex(row, column int) int {
+	if row == 0 {
+		return column
+	} else if row == 1 {
+		return row + column + 2
+	} else if row == 2 {
+		return row + column + 4
+	} else if row == 3 {
+		return row + column + 5
+	} else {
+		return row + column + 5
+	}
 }
 
 // Order in grids:
