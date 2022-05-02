@@ -1,14 +1,14 @@
 package zebra
 
 type Grid struct {
-	rows Category
+	rows    Category
 	columns Category
-	grid [5][5]int
+	grid    [5][5]int
 }
 
 type Category int
 
-const(
+const (
 	Position Category = iota
 	Nationality
 	Colour
@@ -17,21 +17,82 @@ const(
 	Cigarettes
 )
 
+const (
+	Unknown int = iota
+	NoMatch
+	Match
+)
+
 type Solution struct {
 	DrinksWater string
 	OwnsZebra   string
 }
 
 func SolvePuzzle() Solution {
+	grids := [5][6]Grid{}
+	for i := 0; i <= 4; i++ {
+		for j := i; j <= 5; j++ {
+			grids[i][j] = Grid{rows: Category(i), columns: Category(j), grid: [5][5]int{}}
+		}
+	}
+	for rowIndex, row := range grids {
+		for columnIndex := range row {
+			grids[rowIndex][columnIndex].InitialiseGrid()
+		}
+	}
 	panic("Please implement the SolvePuzzle function")
 }
 
-// Englishman, Spaniard, Ukranian, Norwegian, Japanese
-// red, green, yellow, blue, ivory
-// dog, snails, fox, horse, zebra
-// coffee, tea, milk, orange juice, water
-// Old Gold, Kool, Chesterfield, Lucky Strike, Parliament
-// first, second, third, fourth, fifth
+func (g *Grid) InitialiseGrid() {
+	if g == nil {
+		return
+	}
+	if g.rows == Nationality && g.columns == Colour {
+		g.grid[0][0] = Match
+		g.grid[3][3] = NoMatch
+	}
+	if g.rows == Nationality && g.columns == Pet {
+		g.grid[1][0] = Match
+	}
+	if g.rows == Colour && g.columns == Drink {
+		g.grid[1][0] = Match
+	}
+	if g.rows == Nationality && g.columns == Drink {
+		g.grid[2][1] = Match
+	}
+	if g.rows == Pet && g.columns == Cigarettes {
+		g.grid[1][0] = Match
+		g.grid[2][2] = NoMatch
+		g.grid[3][1] = NoMatch
+	}
+	if g.rows == Colour && g.columns == Cigarettes {
+		g.grid[2][1] = Match
+	}
+	if g.rows == Position && g.columns == Drink {
+		g.grid[2][2] = Match
+	}
+	if g.rows == Position && g.columns == Nationality {
+		g.grid[0][2] = Match
+	}
+	if g.rows == Drink && g.columns == Cigarettes {
+		g.grid[3][3] = Match
+	}
+	if g.rows == Nationality && g.columns == Cigarettes {
+		g.grid[2][2] = Match
+	}
+}
+
+func (g *Grid) FillGrid() {
+
+}
+
+// Order in grids:
+// Position: first, second, third, fourth, fifth
+// Nationality: Englishman, Spaniard, Ukranian, Norwegian, Japanese
+// Colour: red, green, yellow, blue, ivory
+// Pet: dog, snails, fox, horse, zebra
+// Drink: coffee, tea, milk, orange juice, water
+// Cigarettes: Old Gold, Kool, Chesterfield, Lucky Strike, Parliament
 
 // Create grids which pair each of the above categories where there is exactly one tick in each row and column
 // Fill in what is given initially
