@@ -1,5 +1,7 @@
 package zebra
 
+import "fmt"
+
 type Grid struct {
 	rows    Category
 	columns Category
@@ -43,7 +45,7 @@ func SolvePuzzle() Solution {
 		gridsComplete = true
 		for index := range grids {
 			grids[index].CompareGrids(grids)
-			grids[index].AdditionalChecks()
+			grids[index].AdditionalChecks(grids)
 			grids[index].RowColumnComplete()
 			grids[index].FillSinglePossibilities()
 			if !grids[index].IsComplete() {
@@ -59,53 +61,57 @@ func (g *Grid) InitialiseGrid() {
 		return
 	}
 	if g.rows == Nationality && g.columns == Colour {
+		// Englishman lives in red house
 		g.grid[0][0] = Match
+		// Norwegian does not live in blue house
 		g.grid[3][3] = NoMatch
 	}
 	if g.rows == Nationality && g.columns == Pet {
+		// Spaniard owns dog
 		g.grid[1][0] = Match
 	}
 	if g.rows == Colour && g.columns == Drink {
+		// Person in green house drinks coffee
 		g.grid[1][0] = Match
 	}
 	if g.rows == Nationality && g.columns == Drink {
+		// Ukranian drinks tea
 		g.grid[2][1] = Match
 	}
 	if g.rows == Pet && g.columns == Cigarettes {
+		// Old Gold smoker owns snails
 		g.grid[1][0] = Match
+		// Chesterfield smoker does not own fox
 		g.grid[2][2] = NoMatch
+		// Kools smoker does not own horse
 		g.grid[3][1] = NoMatch
 	}
 	if g.rows == Colour && g.columns == Cigarettes {
+		// Kools smoker lives in yellow house
 		g.grid[2][1] = Match
 	}
 	if g.rows == Position && g.columns == Drink {
+		// Milk is drunk in middle house
 		g.grid[2][2] = Match
 	}
 	if g.rows == Position && g.columns == Nationality {
-		g.grid[0][2] = Match
+		// Norwegian lives in first house
+		g.grid[0][3] = Match
 	}
 	if g.rows == Drink && g.columns == Cigarettes {
+		// Lucky Strike smoker drinks orange juice
 		g.grid[3][3] = Match
 	}
 	if g.rows == Nationality && g.columns == Cigarettes {
-		g.grid[2][2] = Match
+		// Japanese smokes Parliament
+		g.grid[4][4] = Match
 	}
 	if g.rows == Position && g.columns == Colour {
+		// Green house is on right of ivory house so can't be on far left
 		g.grid[0][1] = NoMatch
+		// Ivory house is on left of green house so can't be on far right
 		g.grid[4][4] = NoMatch
 	}
-}
-
-func (g *Grid) IsComplete() bool {
-	for _, row := range g.grid {
-		for _, position := range row {
-			if position == Unknown {
-				return false
-			}
-		}
-	}
-	return true
 }
 
 func (g *Grid) CompareGrids(grids []Grid) {
@@ -152,7 +158,21 @@ func (g *Grid) CompareGrids(grids []Grid) {
 	}
 }
 
-func (g *Grid) AdditionalChecks() {
+func FindGridIndex(row, column int) int {
+	if row == 0 {
+		return column - 1
+	} else if row == 1 {
+		return row + column + 2
+	} else if row == 2 {
+		return row + column + 4
+	} else if row == 3 {
+		return row + column + 5
+	} else {
+		return row + column + 5
+	}
+}
+
+func (g *Grid) AdditionalChecks(grids []Grid) {
 	// checking green house is on the right of the ivory house
 	if g.rows == Position && g.columns == Colour {
 		for i := 0; i <= 4; i++ {
@@ -169,10 +189,92 @@ func (g *Grid) AdditionalChecks() {
 		}
 	}
 	// checking Chesterfield is next to fox
+	// for any position, if neither side can be fox, cannot be Chesterfield
+	// if fox is determined and one side is already taken, Chesterfield can be assigned
+	// vice versa
+	// Also check Kool is next to horse
+	if g.rows == Position && g.columns == Pet {
+		positionCigarettes := grids[FindGridIndex(0, 5)]
+		for i := 0; i <= 4; i++ {
+			if (i == 0 || positionCigarettes.grid[i-1][2] == NoMatch) && (i == 4 || positionCigarettes.grid[i+1][2] == NoMatch) {
+				g.grid[i][2] = NoMatch
+			}
+			if positionCigarettes.grid[i][2] == Match && (i == 0 || g.grid[i-1][2] == NoMatch) {
+				g.grid[i+1][2] = Match
+			}
+			if positionCigarettes.grid[i][2] == Match && (i == 4 || g.grid[i+1][2] == NoMatch) {
+				g.grid[i-1][2] = Match
+			}
+		}
+		for i := 0; i <= 4; i++ {
+			if (i == 0 || positionCigarettes.grid[i-1][1] == NoMatch) && (i == 4 || positionCigarettes.grid[i+1][1] == NoMatch) {
+				g.grid[i][3] = NoMatch
+			}
+			if positionCigarettes.grid[i][1] == Match && (i == 0 || g.grid[i-1][3] == NoMatch) {
+				g.grid[i+1][3] = Match
+			}
+			if positionCigarettes.grid[i][1] == Match && (i == 4 || g.grid[i+1][3] == NoMatch) {
+				g.grid[i-1][3] = Match
+			}
+		}
+	}
 
-	// checking Kool is next to horse
+	if g.rows == Position && g.columns == Cigarettes {
+		positionPet := grids[FindGridIndex(0, 3)]
+		for i := 0; i <= 4; i++ {
+			if (i == 0 || positionPet.grid[i-1][2] == NoMatch) && (i == 4 || positionPet.grid[i+1][2] == NoMatch) {
+				g.grid[i][2] = NoMatch
+			}
+			if positionPet.grid[i][2] == Match && (i == 0 || g.grid[i-1][2] == NoMatch) {
+				g.grid[i+1][2] = Match
+			}
+			if positionPet.grid[i][2] == Match && (i == 4 || g.grid[i+1][2] == NoMatch) {
+				g.grid[i-1][2] = Match
+			}
+		}
+		for i := 0; i <= 4; i++ {
+			if (i == 0 || positionPet.grid[i-1][3] == NoMatch) && (i == 4 || positionPet.grid[i+1][3] == NoMatch) {
+				g.grid[i][1] = NoMatch
+			}
+			if positionPet.grid[i][3] == Match && (i == 0 || g.grid[i-1][1] == NoMatch) {
+				g.grid[i+1][1] = Match
+			}
+			if positionPet.grid[i][3] == Match && (i == 4 || g.grid[i+1][1] == NoMatch) {
+				g.grid[i-1][1] = Match
+			}
+		}
+	}
 
 	// checking Norwegian is next to blue
+	if g.rows == Position && g.columns == Nationality {
+		positionColour := grids[FindGridIndex(0, 2)]
+		for i := 0; i <= 4; i++ {
+			if (i == 0 || positionColour.grid[i-1][3] == NoMatch) && (i == 4 || positionColour.grid[i+1][3] == NoMatch) {
+				g.grid[i][3] = NoMatch
+			}
+			if positionColour.grid[i][3] == Match && (i == 0 || g.grid[i-1][3] == NoMatch) {
+				g.grid[i+1][3] = Match
+			}
+			if positionColour.grid[i][3] == Match && (i == 4 || g.grid[i+1][3] == NoMatch) {
+				g.grid[i-1][3] = Match
+			}
+		}
+	}
+
+	if g.rows == Position && g.columns == Colour {
+		positionNationality := grids[FindGridIndex(0, 1)]
+		for i := 0; i <= 4; i++ {
+			if (i == 0 || positionNationality.grid[i-1][3] == NoMatch) && (i == 4 || positionNationality.grid[i+1][3] == NoMatch) {
+				g.grid[i][3] = NoMatch
+			}
+			if positionNationality.grid[i][3] == Match && (i == 0 || g.grid[i-1][3] == NoMatch) {
+				g.grid[i+1][3] = Match
+			}
+			if positionNationality.grid[i][3] == Match && (i == 4 || g.grid[i+1][3] == NoMatch) {
+				g.grid[i-1][3] = Match
+			}
+		}
+	}
 }
 
 func (g *Grid) RowColumnComplete() {
@@ -253,18 +355,15 @@ func (g *Grid) OnePossibilityColumn(columnIndex int) (int, bool) {
 	return unknownIndex, oneUnknown
 }
 
-func FindGridIndex(row, column int) int {
-	if row == 0 {
-		return column - 1
-	} else if row == 1 {
-		return row + column + 2
-	} else if row == 2 {
-		return row + column + 4
-	} else if row == 3 {
-		return row + column + 5
-	} else {
-		return row + column + 5
+func (g *Grid) IsComplete() bool {
+	for _, row := range g.grid {
+		for _, position := range row {
+			if position == Unknown {
+				return false
+			}
+		}
 	}
+	return true
 }
 
 // Order in grids:
