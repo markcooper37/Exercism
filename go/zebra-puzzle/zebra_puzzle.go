@@ -1,7 +1,5 @@
 package zebra
 
-import "fmt"
-
 type Grid struct {
 	rows    Category
 	columns Category
