@@ -9,17 +9,12 @@ pub enum Classification {
 
 pub fn classify(num: u64) -> Option<Classification> {
     if num == 0 {
-        return None;
-    }
-    let mut sum = 0;
-    for i in 1..=num/2 {
-        if num % i == 0 {
-            sum += i;
+        None
+    } else {
+        match (1..=num/2).filter(|&s| num % s == 0).sum::<u64>().cmp(&num) {
+            Ordering::Less => Some(Classification::Deficient),
+            Ordering::Greater => Some(Classification::Abundant),
+            Ordering::Equal => Some(Classification::Perfect),
         }
-    }
-    match sum.cmp(&num) {
-        Ordering::Less => Some(Classification::Deficient),
-        Ordering::Greater => Some(Classification::Abundant),
-        Ordering::Equal => Some(Classification::Perfect)
     }
 }
