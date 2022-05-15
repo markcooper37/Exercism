@@ -22,19 +22,36 @@ impl Palindrome {
 }
 
 pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome)> {
-    let mut palindromes: Vec<Palindrome> = vec![];
+    let mut palindromes: (u64, u64) = (u64::MAX, 0);
     for i in min..=max {
         for j in i..=max {
+            if palindromes.0 < i * i {
+                break
+            }
             match Palindrome::new(i*j) {
-                Some(palindrome) => palindromes.push(palindrome),
+                Some(palindrome) => if palindrome.into_inner() < palindromes.0 {
+                    palindromes.0 = palindrome.into_inner();
+                },
                 _ => continue,
             }
         }
     }
-    palindromes.sort_by(|a, b| a.into_inner().cmp(&b.into_inner()));
-    if palindromes.len() < 2 {
+    for i in (min..=max).rev() {
+        for j in (min..=i).rev() {
+            if palindromes.1 > i * i {
+                break
+            }
+            match Palindrome::new(i*j) {
+                Some(palindrome) => if palindrome.into_inner() > palindromes.1 {
+                    palindromes.1 = palindrome.into_inner();
+                },
+                _ => continue,
+            }
+        }
+    }
+    if palindromes.0 == u64::MAX || (palindromes.1 == 0 && max != 0) {
         None
     } else {
-        Some((palindromes[0], palindromes[palindromes.len()-1]))
+        Some((Palindrome::new(palindromes.0).unwrap(), Palindrome::new(palindromes.1).unwrap()))
     }
 }
