@@ -1,18 +1,15 @@
 package sieve
 
 func Sieve(limit int) []int {
-    numbers := map[int]bool{}
-	for i := 2; i <= limit; i++ {
-        numbers[i] = true
-    }
+    notPrime := map[int]bool{}
 	for i := 2; i <= limit; i++ {
         for j := 2; i * j <= limit; j++ {
-            numbers[i * j] = false
+            notPrime[i * j] = true
         }
     }
 	primes := []int{}
 	for i := 2; i <= limit; i++ {
-        if numbers[i] == true {
+        if _, ok := notPrime[i]; !ok {
             primes = append(primes, i)
         }
     }
