@@ -2,41 +2,54 @@ use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 pub struct Dna {
-    dna: String
+    dna: String,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Rna {
-    rna: String
+    rna: String,
 }
 
 impl Dna {
     pub fn new(dna: &str) -> Result<Dna, usize> {
-        for char in dna.chars().enumerate() {
-            if char.1 != 'G' && char.1 != 'C' && char.1 != 'T' && char.1 != 'A' {
-                return Err(char.0)
-            }
+        match dna
+            .chars()
+            .position(|c| c != 'G' && c != 'C' && c != 'T' && c != 'A')
+        {
+            Some(pos) => Err(pos),
+            None => Ok(Dna {
+                dna: dna.to_string(),
+            }),
         }
-        Ok(Dna{dna: dna.to_string()})
     }
 
     pub fn into_rna(self) -> Rna {
-        let mut complements = HashMap::new();
-        complements.insert('G', 'C');
-        complements.insert('C', 'G');
-        complements.insert('T', 'A');
-        complements.insert('A', 'U');
-        Rna{rna: self.dna.chars().map(|c| complements.get(&c).unwrap()).collect::<String>()}
+        let dna_nucleotides = vec!['G', 'C', 'T', 'A'];
+        let rna_nucleotides = vec!['C', 'G', 'A', 'U'];
+        let complements: HashMap<_, _> = dna_nucleotides
+            .into_iter()
+            .zip(rna_nucleotides.into_iter())
+            .collect();
+        Rna {
+            rna: self
+                .dna
+                .chars()
+                .map(|c| complements.get(&c).unwrap())
+                .collect::<String>(),
+        }
     }
 }
 
 impl Rna {
     pub fn new(rna: &str) -> Result<Rna, usize> {
-        for char in rna.chars().enumerate() {
-            if char.1 != 'G' && char.1 != 'C' && char.1 != 'U' && char.1 != 'A' {
-                return Err(char.0)
-            }
+        match rna
+            .chars()
+            .position(|c| c != 'G' && c != 'C' && c != 'U' && c != 'A')
+        {
+            Some(pos) => Err(pos),
+            None => Ok(Rna {
+                rna: rna.to_string(),
+            }),
         }
-        Ok(Rna{rna: rna.to_string()})
     }
 }
