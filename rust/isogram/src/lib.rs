@@ -1,16 +1,10 @@
-use std::collections::HashMap;
+use std::collections::HashSet;
 
 pub fn check(candidate: &str) -> bool {
-    let mut chars_in_candidate = HashMap::new();
+    let mut chars_in_candidate = HashSet::new();
     candidate
         .to_lowercase()
         .chars()
         .filter(|c| c.is_alphabetic())
-        .all(|c| match chars_in_candidate.get(&c) {
-            Some(_) => false,
-            None => {
-                chars_in_candidate.insert(c, true);
-                true
-            }
-        })
+        .all(|c| chars_in_candidate.insert(c))
 }
