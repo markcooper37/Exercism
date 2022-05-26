@@ -5,15 +5,16 @@ pub fn encode(key: &str, s: &str) -> Option<String> {
         || !s.chars().all(|c| c >= 'a' && c <= 'z')
         || key.is_empty()
     {
-        return None;
+        None
+    } else {
+        let key = key.chars().collect::<Vec<char>>();
+        Some(
+            s.chars()
+                .enumerate()
+                .map(|c| (((c.1 as u8 + key[c.0 % key.len()] as u8 - 194) % 26) + 97) as char)
+                .collect::<String>(),
+        )
     }
-    let key = key.chars().collect::<Vec<char>>();
-    let s = s
-        .chars()
-        .enumerate()
-        .map(|c| (((c.1 as u8 + key[c.0 % key.len()] as u8 - 194) % 26) + 97) as char)
-        .collect::<String>();
-    Some(s)
 }
 
 pub fn decode(key: &str, s: &str) -> Option<String> {
@@ -21,30 +22,25 @@ pub fn decode(key: &str, s: &str) -> Option<String> {
         || !s.chars().all(|c| c >= 'a' && c <= 'z')
         || key.is_empty()
     {
-        return None;
+        None
+    } else {
+        let key = key.chars().collect::<Vec<char>>();
+        Some(
+            s.chars()
+                .enumerate()
+                .map(|c| (((c.1 as u8 + 26 - key[c.0 % key.len()] as u8) % 26) + 97) as char)
+                .collect::<String>(),
+        )
     }
-    let key = key.chars().collect::<Vec<char>>();
-    let s = s
-        .chars()
-        .enumerate()
-        .map(|c| (((c.1 as u8 + 26 - key[c.0 % key.len()] as u8) % 26) + 97) as char)
-        .collect::<String>();
-    Some(s)
 }
 
 pub fn encode_random(s: &str) -> (String, String) {
-    let chars: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
-    let key_length: usize = 100;
+    const CHARS: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
+    const KEY_LENGTH: usize = 100;
     let mut rng = rand::thread_rng();
-
-    let key: String = (0..key_length)
-        .map(|_| {
-            let idx = rng.gen_range(0..chars.len());
-            chars[idx] as char
-        })
+    let key: String = (0..KEY_LENGTH)
+        .map(|_| CHARS[rng.gen_range(0..CHARS.len())] as char)
         .collect();
-
     let encoded_value = encode(&key, s).unwrap();
-
     (key, encoded_value)
 }
