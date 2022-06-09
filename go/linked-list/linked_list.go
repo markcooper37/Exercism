@@ -21,7 +21,7 @@ var ErrEmptyList = errors.New("list has length zero")
 func NewList(args ...interface{}) *List {
 	newList := &List{}
 	for _, value := range args {
-		newList.PushBack(value)
+		newList.Push(value)
 	}
 	return newList
 }
@@ -34,7 +34,7 @@ func (n *Node) Prev() *Node {
 	return n.PreviousNode
 }
 
-func (l *List) PushFront(v interface{}) {
+func (l *List) Unshift(v interface{}) {
 	l.head = &Node{Value: v, NextNode: l.head}
 	l.size++
 	if l.size == 1 {
@@ -44,7 +44,7 @@ func (l *List) PushFront(v interface{}) {
 	}
 }
 
-func (l *List) PushBack(v interface{}) {
+func (l *List) Push(v interface{}) {
 	l.tail = &Node{Value: v, PreviousNode: l.tail}
 	l.size++
 	if l.size == 1 {
@@ -54,7 +54,7 @@ func (l *List) PushBack(v interface{}) {
 	}
 }
 
-func (l *List) PopFront() (interface{}, error) {
+func (l *List) Shift() (interface{}, error) {
 	if l.size == 0 {
 		return nil, ErrEmptyList
 	}
@@ -69,7 +69,7 @@ func (l *List) PopFront() (interface{}, error) {
 	return value, nil
 }
 
-func (l *List) PopBack() (interface{}, error) {
+func (l *List) Pop() (interface{}, error) {
 	if l.size == 0 {
 		return nil, ErrEmptyList
 	}
