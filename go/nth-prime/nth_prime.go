@@ -1,8 +1,10 @@
 package prime
 
-func Nth(n int) (int, bool) {
+import "errors"
+
+func Nth(n int) (int, error) {
 	if n < 1 {
-        return 0, false
+        return 0, errors.New("input must be greater than or equal to 1")
     }
 	primes := []int{2}
     numberToCheck := 3
@@ -20,5 +22,5 @@ func Nth(n int) (int, bool) {
         	numberToCheck++
         }
     }
-	return primes[n - 1], true
+	return primes[n - 1], nil
 }
