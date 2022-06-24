@@ -14,52 +14,23 @@ pub trait Planet {
     fn years_during(d: &Duration) -> f64;
 }
 
-pub struct Mercury();
-pub struct Venus();
-pub struct Earth();
-pub struct Mars();
-pub struct Jupiter();
-pub struct Saturn();
-pub struct Uranus();
-pub struct Neptune();
+pub struct Mercury;
+pub struct Venus;
+pub struct Earth;
+pub struct Mars;
+pub struct Jupiter;
+pub struct Saturn;
+pub struct Uranus;
+pub struct Neptune;
 
-impl Planet for Mercury {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / 31557600. / 0.2408467
-    }
+macro_rules! impl_planet {
+    (for $($t:ty; and $b:expr),+) => {
+        $(impl Planet for $t {
+            fn years_during(d: &Duration) -> f64 {
+                d.0 / 31557600. / $b
+            }
+        })*
+    };
 }
-impl Planet for Venus {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / 31557600. / 0.61519726
-    }
-}
-impl Planet for Earth {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / 31557600.
-    }
-}
-impl Planet for Mars {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / 31557600. / 1.8808158
-    }
-}
-impl Planet for Jupiter {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / 31557600. / 11.862615
-    }
-}
-impl Planet for Saturn {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / 31557600. / 29.447498
-    }
-}
-impl Planet for Uranus {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / 31557600. / 84.016846
-    }
-}
-impl Planet for Neptune {
-    fn years_during(d: &Duration) -> f64 {
-        d.0 / 31557600. / 164.79132
-    }
-}
+
+impl_planet!(for Mercury; and 0.2408467, Venus; and 0.61519726, Earth; and 1., Mars; and 1.8808158, Jupiter; and 11.862615, Saturn; and 29.447498, Uranus; and 84.016846, Neptune; and 164.79132);
