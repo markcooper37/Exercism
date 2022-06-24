@@ -1,6 +1,3 @@
-// The code below is a stub. Just enough to satisfy the compiler.
-// In order to pass the tests you can add-to or change any of this code.
-
 #[derive(Debug)]
 pub struct Duration(f64);
 
@@ -14,20 +11,12 @@ pub trait Planet {
     fn years_during(d: &Duration) -> f64;
 }
 
-pub struct Mercury;
-pub struct Venus;
-pub struct Earth;
-pub struct Mars;
-pub struct Jupiter;
-pub struct Saturn;
-pub struct Uranus;
-pub struct Neptune;
-
 macro_rules! impl_planet {
-    (for $($t:ty; and $b:expr),+) => {
-        $(impl Planet for $t {
+    (for $($planet:ident; and $period:expr),+) => {
+        $(pub struct $planet;
+        impl Planet for $planet {
             fn years_during(d: &Duration) -> f64 {
-                d.0 / 31557600. / $b
+                d.0 / 31557600. / $period
             }
         })*
     };
