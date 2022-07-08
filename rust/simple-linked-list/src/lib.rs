@@ -34,7 +34,18 @@ impl<T> SimpleLinkedList<T> {
     }
 
     pub fn push(&mut self, _element: T) {
-        unimplemented!()  
+        let new_node = Some(Box::new(Node {
+            data: _element,
+            next: None,
+        }));
+        let mut current_node = &mut self.head;
+        while let Some(node) = current_node {
+            current_node = &mut node.next;
+        }
+        match current_node {
+            None => self.head = new_node,
+            Some(ref mut current_node) => current_node.next = new_node,
+        }
     }
 
     pub fn pop(&mut self) -> Option<T> {
@@ -42,7 +53,14 @@ impl<T> SimpleLinkedList<T> {
     }
 
     pub fn peek(&self) -> Option<&T> {
-        unimplemented!()
+        let mut current_node = &self.head;
+        while let Some(node) = current_node {
+            current_node = &node.next;
+        }
+        match current_node {
+            &None => None,
+            &Some(ref current_node) => Some(&current_node.data),
+        }
     }
 
     #[must_use]
@@ -72,9 +90,9 @@ impl<T: Copy> From<SimpleLinkedList<T>> for Vec<T> {
     fn from(mut _linked_list: SimpleLinkedList<T>) -> Vec<T> {
         let mut vector: Vec<T> = Vec::new();
         let mut current_node = &_linked_list.head;
-        while !current_node.is_none() {
-            vector.push(current_node.as_ref().unwrap().data);
-            current_node = &current_node.as_ref().unwrap().next;
+        while let Some(node) = current_node {
+            vector.push(node.data);
+            current_node = &node.next;
         }
         vector
     }
