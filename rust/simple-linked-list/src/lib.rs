@@ -1,4 +1,4 @@
-use std::iter::FromIterator;
+use std::{iter::FromIterator, mem};
 
 pub struct SimpleLinkedList<T> {
     head: Option<Box<Node<T>>>,
@@ -9,16 +9,11 @@ struct Node<T> {
     next: Option<Box<Node<T>>>,
 }
 
-impl<T> SimpleLinkedList<T> {
+impl<T: Copy> SimpleLinkedList<T> {
     pub fn new() -> Self {
         SimpleLinkedList { head: None }
     }
 
-    // You may be wondering why it's necessary to have is_empty()
-    // when it can easily be determined from len().
-    // It's good custom to have both because len() can be expensive for some types,
-    // whereas is_empty() is almost always cheap.
-    // (Also ask yourself whether len() is expensive for SimpleLinkedList)
     pub fn is_empty(&self) -> bool {
         self.head.is_none()
     }
@@ -26,9 +21,9 @@ impl<T> SimpleLinkedList<T> {
     pub fn len(&self) -> usize {
         let mut len: usize = 0;
         let mut current_node = &self.head;
-        while !current_node.is_none() {
+        while let Some(node) = current_node {
             len += 1;
-            current_node = &current_node.as_ref().unwrap().next;
+            current_node = &node.next;
         }
         len
     }
@@ -36,62 +31,55 @@ impl<T> SimpleLinkedList<T> {
     pub fn push(&mut self, _element: T) {
         let new_node = Some(Box::new(Node {
             data: _element,
-            next: None,
+            next: mem::replace(&mut self.head, None),
         }));
-        let mut current_node = &mut self.head;
-        while let Some(node) = current_node {
-            current_node = &mut node.next;
-        }
-        match current_node {
-            None => self.head = new_node,
-            Some(ref mut current_node) => current_node.next = new_node,
-        }
+        self.head = new_node;
     }
 
     pub fn pop(&mut self) -> Option<T> {
-        unimplemented!()
+        match mem::replace(&mut self.head, None) {
+            None => None,
+            Some(node) => {
+                self.head = node.next;
+                Some(node.data)
+            }
+        }
     }
 
     pub fn peek(&self) -> Option<&T> {
-        let mut current_node = &self.head;
-        while let Some(node) = current_node {
-            current_node = &node.next;
-        }
-        match current_node {
-            &None => None,
-            &Some(ref current_node) => Some(&current_node.data),
+        match self.head {
+            None => None,
+            Some(ref current_node) => Some(&current_node.data),
         }
     }
 
     #[must_use]
     pub fn rev(self) -> SimpleLinkedList<T> {
-        unimplemented!()
+        let mut new_list = SimpleLinkedList::new();
+        let mut self_copy = self;
+        while !self_copy.head.is_none() {
+            new_list.push(self_copy.pop().unwrap())
+        }
+        new_list
     }
 }
 
-impl<T> FromIterator<T> for SimpleLinkedList<T> {
+impl<T: Copy> FromIterator<T> for SimpleLinkedList<T> {
     fn from_iter<I: IntoIterator<Item = T>>(_iter: I) -> Self {
-        unimplemented!()
+        let mut new_list = SimpleLinkedList::new();
+        for value in _iter.into_iter() {
+            new_list.push(value)
+        }
+        new_list
     }
 }
-
-// In general, it would be preferable to implement IntoIterator for SimpleLinkedList<T>
-// instead of implementing an explicit conversion to a vector. This is because, together,
-// FromIterator and IntoIterator enable conversion between arbitrary collections.
-// Given that implementation, converting to a vector is trivial:
-//
-// let vec: Vec<_> = simple_linked_list.into_iter().collect();
-//
-// The reason this exercise's API includes an explicit conversion to Vec<T> instead
-// of IntoIterator is that implementing that interface is fairly complicated, and
-// demands more of the student than we expect at this point in the track.
 
 impl<T: Copy> From<SimpleLinkedList<T>> for Vec<T> {
     fn from(mut _linked_list: SimpleLinkedList<T>) -> Vec<T> {
         let mut vector: Vec<T> = Vec::new();
         let mut current_node = &_linked_list.head;
         while let Some(node) = current_node {
-            vector.push(node.data);
+            vector.insert(0, node.data);
             current_node = &node.next;
         }
         vector
