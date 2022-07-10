@@ -1,4 +1,4 @@
-use std::{iter::FromIterator, mem};
+use std::{iter::FromIterator};
 
 pub struct SimpleLinkedList<T> {
     head: Option<Box<Node<T>>>,
@@ -9,7 +9,7 @@ struct Node<T> {
     next: Option<Box<Node<T>>>,
 }
 
-impl<T: Copy> SimpleLinkedList<T> {
+impl<T> SimpleLinkedList<T> {
     pub fn new() -> Self {
         SimpleLinkedList { head: None }
     }
@@ -28,16 +28,16 @@ impl<T: Copy> SimpleLinkedList<T> {
         len
     }
 
-    pub fn push(&mut self, _element: T) {
+    pub fn push(&mut self, element: T) {
         let new_node = Some(Box::new(Node {
-            data: _element,
-            next: mem::replace(&mut self.head, None),
+            data: element,
+            next: self.head.take(),
         }));
         self.head = new_node;
     }
 
     pub fn pop(&mut self) -> Option<T> {
-        match mem::replace(&mut self.head, None) {
+        match self.head.take() {
             None => None,
             Some(node) => {
                 self.head = node.next;
@@ -54,33 +54,30 @@ impl<T: Copy> SimpleLinkedList<T> {
     }
 
     #[must_use]
-    pub fn rev(self) -> SimpleLinkedList<T> {
+    pub fn rev(mut self) -> SimpleLinkedList<T> {
         let mut new_list = SimpleLinkedList::new();
-        let mut self_copy = self;
-        while !self_copy.head.is_none() {
-            new_list.push(self_copy.pop().unwrap())
+        while let Some(element) = self.pop() {
+            new_list.push(element)
         }
         new_list
     }
 }
 
-impl<T: Copy> FromIterator<T> for SimpleLinkedList<T> {
-    fn from_iter<I: IntoIterator<Item = T>>(_iter: I) -> Self {
+impl<T> FromIterator<T> for SimpleLinkedList<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         let mut new_list = SimpleLinkedList::new();
-        for value in _iter.into_iter() {
+        for value in iter {
             new_list.push(value)
         }
         new_list
     }
 }
 
-impl<T: Copy> From<SimpleLinkedList<T>> for Vec<T> {
-    fn from(mut _linked_list: SimpleLinkedList<T>) -> Vec<T> {
+impl<T> From<SimpleLinkedList<T>> for Vec<T> {
+    fn from(mut linked_list: SimpleLinkedList<T>) -> Vec<T> {
         let mut vector: Vec<T> = Vec::new();
-        let mut current_node = &_linked_list.head;
-        while let Some(node) = current_node {
-            vector.insert(0, node.data);
-            current_node = &node.next;
+        while let Some(element) = linked_list.pop() {
+            vector.insert(0, element);
         }
         vector
     }
