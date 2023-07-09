@@ -1,6 +1,5 @@
 #include "darts.h"
 #include <cmath>
-#include <iostream>
 
 namespace darts {
     int score(double x, double y) {
