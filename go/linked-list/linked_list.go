@@ -5,15 +5,15 @@ import (
 )
 
 type Node struct {
-	Value          interface{}
-	NextNode     *Node
-	PreviousNode *Node
+	Value    interface{}
+	next     *Node
+	previous *Node
 }
 
 type List struct {
-	head *Node
-	tail *Node
-	size int
+	first *Node
+	last  *Node
+	size  int
 }
 
 var ErrEmptyList = errors.New("list has length zero")
@@ -27,30 +27,30 @@ func NewList(args ...interface{}) *List {
 }
 
 func (n *Node) Next() *Node {
-	return n.NextNode
+	return n.next
 }
 
 func (n *Node) Prev() *Node {
-	return n.PreviousNode
+	return n.previous
 }
 
 func (l *List) Unshift(v interface{}) {
-	l.head = &Node{Value: v, NextNode: l.head}
+	l.first = &Node{Value: v, next: l.first}
 	l.size++
 	if l.size == 1 {
-		l.tail = l.head
+		l.last = l.first
 	} else {
-		l.head.NextNode.PreviousNode = l.head
+		l.first.next.previous = l.first
 	}
 }
 
 func (l *List) Push(v interface{}) {
-	l.tail = &Node{Value: v, PreviousNode: l.tail}
+	l.last = &Node{Value: v, previous: l.last}
 	l.size++
 	if l.size == 1 {
-		l.head = l.tail
+		l.first = l.last
 	} else {
-		l.tail.PreviousNode.NextNode = l.tail
+		l.last.previous.next = l.last
 	}
 }
 
@@ -58,12 +58,12 @@ func (l *List) Shift() (interface{}, error) {
 	if l.size == 0 {
 		return nil, ErrEmptyList
 	}
-	value := l.head.Value
+	value := l.first.Value
 	if l.size == 1 {
-		l.head, l.tail = nil, nil
+		l.first, l.last = nil, nil
 	} else {
-		l.head = l.head.NextNode
-		l.head.PreviousNode = nil
+		l.first = l.first.next
+		l.first.previous = nil
 	}
 	l.size--
 	return value, nil
@@ -73,12 +73,12 @@ func (l *List) Pop() (interface{}, error) {
 	if l.size == 0 {
 		return nil, ErrEmptyList
 	}
-	value := l.tail.Value
+	value := l.last.Value
 	if l.size == 1 {
-		l.head, l.tail = nil, nil
+		l.first, l.last = nil, nil
 	} else {
-		l.tail = l.tail.PreviousNode
-		l.tail.NextNode = nil
+		l.last = l.last.previous
+		l.last.next = nil
 	}
 	l.size--
 	return value, nil
@@ -88,18 +88,18 @@ func (l *List) Reverse() {
 	if l.size == 0 {
 		return
 	}
-	l.tail, l.head = l.head, l.tail
-	currentNode := l.head
-	for currentNode != nil {
-		currentNode.NextNode, currentNode.PreviousNode = currentNode.PreviousNode, currentNode.NextNode
-		currentNode = currentNode.NextNode
+	l.last, l.first = l.first, l.last
+	current := l.first
+	for current != nil {
+		current.next, current.previous = current.previous, current.next
+		current = current.next
 	}
 }
 
 func (l *List) First() *Node {
-	return l.head
+	return l.first
 }
 
 func (l *List) Last() *Node {
-	return l.tail
+	return l.last
 }
