@@ -1,0 +1,1 @@
+.property as $property | .input.phrase | gsub("\\W"; "") | ascii_downcase | explode | map(if . < 97 or . > 122 then . else (219 - .) end) | if $property == "encode" then ([_nwise(5)] | map(implode) | join(" ")) else implode end
