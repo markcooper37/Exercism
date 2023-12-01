@@ -1,0 +1,25 @@
+{
+  "authors": [],
+  "contributors": [
+    "alexanderific",
+    "amscotti",
+    "Dispader",
+    "ikhadykin",
+    "kytrinyx",
+    "sjwarner-bp"
+  ],
+  "files": {
+    "solution": [
+      "src/main/groovy/Leap.groovy"
+    ],
+    "test": [
+      "src/test/groovy/LeapSpec.groovy"
+    ],
+    "example": [
+      ".meta/src/reference/groovy/Leap.groovy"
+    ]
+  },
+  "blurb": "Given a year, report if it is a leap year.",
+  "source": "CodeRanch Cattle Drive, Assignment 3",
+  "source_url": "https://coderanch.com/t/718816/Leap"
+}
