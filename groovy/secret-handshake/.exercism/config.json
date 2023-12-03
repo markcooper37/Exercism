@@ -1,0 +1,22 @@
+{
+  "authors": [
+    "ikhadykin"
+  ],
+  "contributors": [
+    "amscotti"
+  ],
+  "files": {
+    "solution": [
+      "src/main/groovy/SecretHandshake.groovy"
+    ],
+    "test": [
+      "src/test/groovy/SecretHandshakeSpec.groovy"
+    ],
+    "example": [
+      ".meta/src/reference/groovy/SecretHandshake.groovy"
+    ]
+  },
+  "blurb": "Given a decimal number, convert it to the appropriate sequence of events for a secret handshake.",
+  "source": "Bert, in Mary Poppins",
+  "source_url": "https://www.imdb.com/title/tt0058331/quotes/?item=qt0437047"
+}
