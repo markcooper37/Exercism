@@ -1,0 +1,23 @@
+{
+  "authors": [
+    "mattmoss"
+  ],
+  "contributors": [
+    "amscotti",
+    "sjwarner-bp"
+  ],
+  "files": {
+    "solution": [
+      "src/main/groovy/ScrabbleScore.groovy"
+    ],
+    "test": [
+      "src/test/groovy/ScrabbleScoreSpec.groovy"
+    ],
+    "example": [
+      ".meta/src/reference/groovy/ScrabbleScore.groovy"
+    ]
+  },
+  "blurb": "Given a word, compute the Scrabble score for that word.",
+  "source": "Inspired by the Extreme Startup game",
+  "source_url": "https://github.com/rchatley/extreme_startup"
+}
