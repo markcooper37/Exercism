@@ -1,0 +1,19 @@
+{
+  "authors": [
+    "amscotti"
+  ],
+  "files": {
+    "solution": [
+      "src/main/groovy/Allergies.groovy"
+    ],
+    "test": [
+      "src/test/groovy/AllergiesSpec.groovy"
+    ],
+    "example": [
+      ".meta/src/reference/groovy/Allergies.groovy"
+    ]
+  },
+  "blurb": "Given a person's allergy score, determine whether or not they're allergic to a given item, and their full list of allergies.",
+  "source": "Exercise by the JumpstartLab team for students at The Turing School of Software and Design.",
+  "source_url": "https://turing.edu"
+}
