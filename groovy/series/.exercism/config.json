@@ -1,0 +1,19 @@
+{
+  "authors": [
+    "amscotti"
+  ],
+  "files": {
+    "solution": [
+      "src/main/groovy/Series.groovy"
+    ],
+    "test": [
+      "src/test/groovy/SeriesSpec.groovy"
+    ],
+    "example": [
+      ".meta/src/reference/groovy/Series.groovy"
+    ]
+  },
+  "blurb": "Given a string of digits, output all the contiguous substrings of length `n` in that string.",
+  "source": "A subset of the Problem 8 at Project Euler",
+  "source_url": "https://projecteuler.net/problem=8"
+}
