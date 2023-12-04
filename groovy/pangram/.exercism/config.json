@@ -1,0 +1,19 @@
+{
+  "authors": [
+    "amscotti"
+  ],
+  "files": {
+    "solution": [
+      "src/main/groovy/Pangram.groovy"
+    ],
+    "test": [
+      "src/test/groovy/PangramSpec.groovy"
+    ],
+    "example": [
+      ".meta/src/reference/groovy/Pangram.groovy"
+    ]
+  },
+  "blurb": "Determine if a sentence is a pangram.",
+  "source": "Wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Pangram"
+}
