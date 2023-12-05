@@ -1,0 +1,18 @@
+{
+  "authors": [
+    "amscotti"
+  ],
+  "files": {
+    "solution": [
+      "src/main/groovy/MatchingBrackets.groovy"
+    ],
+    "test": [
+      "src/test/groovy/MatchingBracketsSpec.groovy"
+    ],
+    "example": [
+      ".meta/src/reference/groovy/MatchingBrackets.groovy"
+    ]
+  },
+  "blurb": "Make sure the brackets and braces all match.",
+  "source": "Ginna Baker"
+}
